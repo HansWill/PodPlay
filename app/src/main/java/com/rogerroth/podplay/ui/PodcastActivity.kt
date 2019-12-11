@@ -17,7 +17,9 @@ import com.rogerroth.podplay.R
 import com.rogerroth.podplay.adapter.PodcastListAdapter
 import com.rogerroth.podplay.repository.ItunesRepo
 import com.rogerroth.podplay.repository.PodcastRepo
+import com.rogerroth.podplay.service.FeedService
 import com.rogerroth.podplay.service.ItunesService
+import com.rogerroth.podplay.service.RssFeedService
 import com.rogerroth.podplay.viewmodel.PodcastViewModel
 import com.rogerroth.podplay.viewmodel.SearchViewModel
 import kotlinx.android.synthetic.main.activity_podcast.*
@@ -95,9 +97,9 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 		searchViewModel = ViewModelProviders.of(this).get(SearchViewModel::class.java)
 		searchViewModel.itunesRepo = ItunesRepo(service)
 
-		podcastViewModel = ViewModelProviders.of(this)
-			.get(PodcastViewModel::class.java)
-		podcastViewModel.podcastRepo = PodcastRepo()
+		podcastViewModel = ViewModelProviders.of(this).get(PodcastViewModel::class.java)
+		val rssService = FeedService.instance
+		podcastViewModel.podcastRepo = PodcastRepo(rssService as RssFeedService)
 	}
 
 	private fun updateControls() {
