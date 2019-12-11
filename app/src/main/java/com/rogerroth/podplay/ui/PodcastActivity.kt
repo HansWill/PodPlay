@@ -41,13 +41,6 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 		handleIntent(intent)
 		addBackStacklistener()
 
-		val TAG = javaClass.simpleName
-		val itunesService = ItunesService.instance
-		val itunesRepo = ItunesRepo(itunesService)
-
-		itunesRepo.searchByTerm("Android Developer") {
-			Log.i(TAG, "Results = $it")
-		}
 	}
 
 	override fun onCreateOptionsMenu(menu: Menu): Boolean {
