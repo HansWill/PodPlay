@@ -32,6 +32,7 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 		setupToolbar()
 		setupViewModels()
 		updateControls()
+		handleIntent(intent)
 
 		val TAG = javaClass.simpleName
 		val itunesService = ItunesService.instance
