@@ -12,14 +12,13 @@ import com.rogerroth.podplay.R
 import com.rogerroth.podplay.viewmodel.SearchViewModel
 
 class PodcastListAdapter (private var podcastSummaryViewList: List<SearchViewModel.PodcastSummaryViewData>?,
-						  private val podcastListAdapterListener: PodcastListAdapterListener, private val parentActivity: Activity) :
-	RecyclerView.Adapter<PodcastListAdapter.ViewHolder>() {
+						  private val podcastListAdapterListener: PodcastListAdapterListener,
+						  private val parentActivity: Activity) : RecyclerView.Adapter<PodcastListAdapter.ViewHolder>() {
 	interface PodcastListAdapterListener {
 		fun onShowDetails(podcastSummaryViewData: SearchViewModel.PodcastSummaryViewData
 		)
 	}
-	inner class ViewHolder(v: View, private val podcastListAdapterListener:
-						   PodcastListAdapterListener) : RecyclerView.ViewHolder(v) {
+	inner class ViewHolder(v: View, private val podcastListAdapterListener: PodcastListAdapterListener) : RecyclerView.ViewHolder(v) {
 		var podcastSummaryViewData: SearchViewModel.PodcastSummaryViewData? = null
 		val nameTextView: TextView = v.findViewById(R.id.podcastNameTextView)
 		val lastUpdatedTextView: TextView = v.findViewById(R.id.podcastLastUpdatedTextView)
