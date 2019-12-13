@@ -14,11 +14,17 @@ import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.firebase.jobdispatcher.Constraint
+import com.firebase.jobdispatcher.FirebaseJobDispatcher
+import com.firebase.jobdispatcher.GooglePlayDriver
+import com.firebase.jobdispatcher.Lifetime
+import com.firebase.jobdispatcher.Trigger
 import com.rogerroth.podplay.R
 import com.rogerroth.podplay.adapter.PodcastListAdapter
 import com.rogerroth.podplay.db.PodplayDatabase
 import com.rogerroth.podplay.repository.ItunesRepo
 import com.rogerroth.podplay.repository.PodcastRepo
+import com.rogerroth.podplay.service.EpisodeUpdateService
 import com.rogerroth.podplay.service.FeedService
 import com.rogerroth.podplay.service.ItunesService
 import com.rogerroth.podplay.service.RssFeedService
@@ -33,6 +39,7 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 	private lateinit var searchMenuItem: MenuItem
 	private lateinit var podcastViewModel: PodcastViewModel
 
+	private val TAG_EPISODE_UPDATE_JOB = "com.rogerroth.podplay.episodes"
 	private val TAG = javaClass.simpleName
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +52,7 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 		handleIntent(intent)
 		addBackStacklistener()
 		setupPodcastListView()
+		scheduleJobs()
 
 	}
 
@@ -157,6 +165,14 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 		if (Intent.ACTION_SEARCH == intent.action) {
 			val query = intent.getStringExtra(SearchManager.QUERY)
 			performSearch(query)
+			val podcastFeedUrl = intent
+				.getStringExtra(EpisodeUpdateService.EXTRA_FEED_URL)
+			if (podcastFeedUrl != null) {
+				podcastViewModel.setActivePodcast(podcastFeedUrl) {
+					it?.let { podcastSummaryView -> onShowDetails(podcastSummaryView) }
+				}
+			}
+
 		}
 	}
 
@@ -212,6 +228,23 @@ class PodcastActivity : AppCompatActivity(), PodcastListAdapter.PodcastListAdapt
 				showSubscribedPodcasts()
 			}
 		})
+	}
+
+	private fun scheduleJobs()
+	{
+
+		val dispatcher = FirebaseJobDispatcher(GooglePlayDriver(this))
+		val oneHourInSeconds = 60*60
+		val tenMinutesInSeconds = 60*10
+		val episodeUpdateJob = dispatcher.newJobBuilder()
+			.setService(EpisodeUpdateService::class.java)
+			.setTag(TAG_EPISODE_UPDATE_JOB)
+			.setRecurring(true)
+			.setTrigger(Trigger.executionWindow(oneHourInSeconds, (oneHourInSeconds + tenMinutesInSeconds)))
+			.setLifetime(Lifetime.FOREVER)
+			.setConstraints(Constraint.ON_UNMETERED_NETWORK, Constraint.DEVICE_CHARGING)
+			.build()
+		dispatcher.mustSchedule(episodeUpdateJob)
 	}
 
 	companion object {
